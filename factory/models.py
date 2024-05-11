@@ -80,7 +80,7 @@ class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
     name = models.CharField(max_length=100)
     photo = models.ImageField(upload_to='employees/', null=True, blank=True)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     phone = models.CharField(validators=[phone_regex], max_length=20) # validators should be a list
     email = models.EmailField()
     date_of_birth = models.DateField()
@@ -105,11 +105,11 @@ class PromoCode(models.Model):
     discount = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
     times_used = models.PositiveIntegerField(default=0)
     usage_limit = models.PositiveIntegerField()
-    valid_until = models.DateTimeField()
+    valid_until = models.DateField()
     is_valid = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} {self.discount} {self.valid_until}"
+        return f"{self.code} {self.discount}% {self.valid_until}"
 
     def get_absolute_url(self):
         return reverse('promocode_detail', args=[str(self.id)])

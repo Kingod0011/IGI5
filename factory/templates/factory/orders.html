@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h2>Orders</h2>
+  <form action="{% url 'home' %}" method="get">
+    {% csrf_token %}
+    <button type="submit">Home</button>
+</form>
+  <ul>
+    {% for order in orders %}
+      <li>
+        <h3>{{ order }}</h3>
+      </li>
+      {% endfor %}
+  </ul>
+{% endblock %}

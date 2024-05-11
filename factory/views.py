@@ -1,8 +1,10 @@
 from django.views import View
+from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from .forms import RegistrationForm,ClientForm, EmployeeForm
 from django.contrib.auth.models import User, Group
-from .models import Product, ProductType, Client, Employee 
+from .models import Product, ProductType, Client, Employee, Order 
+from django.db.models import Q
 
 class RegistrationView(View):
     def handle_request(self, request):
@@ -32,6 +34,21 @@ class HomePageView(View):
         products = Product.objects.all()
         producttypes = ProductType.objects.all()
         is_employee = request.user.groups.filter(name='Employees').exists() if request.user.is_authenticated else False
+        price_min = request.GET.get('price_min')
+        price_max = request.GET.get('price_max')
+        product_type = request.GET.get('producttype')
+        search = request.GET.get('search')
+
+        
+        if search:
+            products = products.filter(Q(name__icontains=search))
+        else:
+            if price_min and price_min.isdigit():
+                products = products.filter(price__gte=price_min)
+            if price_max and price_max.isdigit():
+                products = products.filter(price__lte=price_max)
+            if product_type:
+                products = products.filter(product_type=product_type)
         context = {
             'products': products,
             'producttypes': producttypes,
@@ -83,3 +100,14 @@ class EditProfileView(View):
 
     get = handle_request
     post = handle_request
+
+class ClientListView(ListView):
+    model = Client
+    template_name = 'clients.html'  
+    context_object_name = 'clients'
+    ordering = ['name']
+
+class OrderListView(ListView):
+    model = Order
+    template_name = 'orders.html'  # <app>/<model>_<viewtype>.html
+    context_object_name = 'orders'

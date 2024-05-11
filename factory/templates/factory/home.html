@@ -10,9 +10,16 @@
         {% csrf_token %}
         <button type="submit">Profile</button>
     </form>
+    
         {% if is_employee %}
-            <a href="{% url 'clients' %}">Clients</a>
-            <a href="{% url 'orders' %}">Orders</a>
+        <form action="{% url 'clients' %}" method="get">
+            {% csrf_token %}
+            <button type="submit">Clients</button>
+        </form>
+        <form action="{% url 'orders' %}" method="get">
+            {% csrf_token %}
+            <button type="submit">Orders</button>
+        </form>
         {% endif %}
     {% else %}
     <form action="{% url 'register' %}" method="get">
@@ -30,11 +37,11 @@
         <input type="number" id="price_min" name="price_min" value="{{ request.GET.price_min }}">
         <label for="price_max">to:</label>
         <input type="number" id="price_max" name="price_max" value="{{ request.GET.price_max }}">
-        <label for="ProductType">ProductType:</label>
-        <select id="ProductType" name="ProductType">
+        <label for="producttype">ProductType:</label>
+        <select id="producttype" name="producttype">
             <option value="">All</option>
             {% for producttype in producttypes %}
-                <option value="{{ ProductType.id }}" {% if request.GET.ProductType == ProductType.id|stringformat:"s" %}selected{% endif %}>{{ ProductType.name }}</option>
+                <option value="{{ producttype }}" {% if request.GET.producttype == producttype.name %}selected{% endif %}>{{ producttype }}</option>
             {% endfor %}
         </select>
         <label for="search">Search (by name):</label>
@@ -44,17 +51,7 @@
 
     {% for product in products %}
         <div>
-            <h2>{{ product.name }}</h2>
-            <p>{{ product.description }}</p>
-            <p>Price: {{ product.price }}</p>
-            {% if is_employee %}
-                
-            {% else %}
-            <form action="{% url 'order' product.id %}" method="post">
-                {% csrf_token %}
-                <input type="submit" value="Order">
-            </form>
-            {% endif %}
+            <h2>{{ product }}</h2>
         </div>
     {% endfor %}
 {% endblock %}

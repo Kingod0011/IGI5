@@ -2,7 +2,9 @@
 
 {% block content %}
     <h1>Client Profile</h1>
-    <a href="{% url 'home' %}">Home</a>
+    <form action="{% url 'home' %}" method="get">
+        {% csrf_token %}
+        <button type="submit">Home</button>
     {% if user.is_authenticated %}
         <p>Name: {{ user.client.name }}</p>
         <p>Phone: {{ user.client.phone }}</p>
