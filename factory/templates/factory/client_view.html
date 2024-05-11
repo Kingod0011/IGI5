@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Client Profile</h1>
+    <a href="{% url 'home' %}">Home</a>
+    {% if user.is_authenticated %}
+        <p>Name: {{ user.client.name }}</p>
+        <p>Phone: {{ user.client.phone }}</p>
+        <p>City: {{ user.client.city }}</p>
+        <p>Address: {{ user.client.address }}</p>
+        <p>Company: {{ user.client.company }}</p>
+        <p>Date of Birth: {{ user.client.date_of_birth }}</p>
+        <a href="{% url 'edit_profile' %}">Edit</a>
+    {% else %}
+        <p>You are not logged in.</p>
+    {% endif %}
+{% endblock %}
