@@ -1,11 +1,73 @@
 from django.views import View
-from django.views.generic import ListView
-from django.shortcuts import render, redirect
-from .forms import RegistrationForm,ClientForm, EmployeeForm
+from django.views.generic import ListView, CreateView
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import RegistrationForm,ClientForm, EmployeeForm, OrderForm
 from django.contrib.auth.models import User, Group
-from .models import Product, ProductType, Client, Employee, Order 
+from .models import Product, ProductType, Client, Employee, Order, PromoCode, Factory
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.utils.decorators import method_decorator
+from functools import wraps
+from django.http import HttpResponse, HttpResponseBadRequest
+from datetime import date, timedelta
 
+
+
+
+def group_required(*group_names):
+    """Requires user membership in at least one of the groups passed in."""
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(self, request, *args, **kwargs):
+            if bool(request.user.groups.filter(name__in=group_names)) or request.user.is_superuser:
+                return view_func(self, request, *args, **kwargs)
+            else:
+                raise PermissionDenied
+        return _wrapped_view
+    return decorator
+
+employee_required = group_required('Employees')
+client_required = group_required('Clients')
+
+
+#@method_decorator(client_required, name='dispatch')
+@login_required
+def order_create(request, product_id):
+    
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name='Clients').exists():
+            if request.method == 'POST':
+                form = OrderForm(request.POST)
+                if form.is_valid():
+                    order = form.save(commit=False)
+                    promo = form.cleaned_data['promo']
+                    promo_code = PromoCode.objects.filter(code=promo).first()
+                    order.promo_code = promo_code
+                    if order.promo_code:
+                        promo_code.times_used+=1
+                        if(promo_code.usage_limit == promo_code.times_used):
+                            promo_code.is_valid = False
+                        promo_code.save()
+                    factory = Factory.objects.first()
+                    form.instance.client = request.user.client
+                    order.client = request.user.client
+                    order.product = get_object_or_404(Product, id=product_id)
+                    order.client_name = request.user.client.company if request.user.client.company is not None else request.user.client.name
+                    order.product_name = order.product.name
+                    factory.busy_until += timedelta(seconds=int(order.quantity * order.product.production_time.total_seconds() * (1 if not order.promo_code else (order.promo_code.discount/100.))))
+                    order.completion_date = factory.busy_until
+                    order.save()
+                    factory.save()
+                    return HttpResponse(f'Ваш заказ будет готов: {factory.busy_until}')
+            else:
+                form = OrderForm()
+            return render(request, 'order_create.html', {'form': form})
+        else:
+            return redirect('login')
+    else:
+        return redirect('login')
+    
 class RegistrationView(View):
     def handle_request(self, request):
         if request.method == 'POST':

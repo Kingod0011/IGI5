@@ -1,6 +1,7 @@
 from django.core.validators import RegexValidator,MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 
 phone_regex = RegexValidator(
     regex=r'^\+375 \(\d{2}\) \d{3}-\d{2}-\d{2}$',
@@ -81,7 +82,7 @@ class Employee(models.Model):
     name = models.CharField(max_length=100)
     photo = models.ImageField(upload_to='employees/', null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    phone = models.CharField(validators=[phone_regex], max_length=20) # validators should be a list
+    phone = models.CharField(validators=[phone_regex], max_length=20) 
     email = models.EmailField()
     date_of_birth = models.DateField()
     is_deleted = models.BooleanField(default=False)
@@ -159,4 +160,4 @@ class Order(models.Model):
         ordering = ['completion_date']
 
 class Factory(models.Model):
-    busy_until = models.DateTimeField(null=True)
+    busy_until = models.DateTimeField(default=datetime.now)

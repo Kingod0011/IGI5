@@ -52,6 +52,14 @@
     {% for product in products %}
         <div>
             <h2>{{ product }}</h2>
+            {% if is_employee %}
+                
+            {% else %}
+            <form action="{% url 'create_order' product.id %}" method="get">
+                {% csrf_token %}
+                <input type="submit" value="Order">
+            </form>
+            {% endif %}
         </div>
     {% endfor %}
 {% endblock %}

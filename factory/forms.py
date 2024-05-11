@@ -1,8 +1,28 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Client, Employee 
+from .models import Client, Employee, Order, PromoCode
 from django.contrib.auth.models import User
 from datetime import date, timedelta
+
+class OrderForm(forms.ModelForm):    
+    promo = forms.CharField(required=False,widget=forms.TextInput(attrs={'required': False}))  
+    class Meta:
+        model = Order
+        fields = ['quantity', 'pickup_point']
+
+    def clean_promo(self):
+        promo = self.cleaned_data.get('promo')
+        if promo:
+            promo_code_obj = PromoCode.objects.filter(code=promo).first()
+            if not promo_code_obj:
+                raise ValidationError('There is no such promo code')
+            else:
+                if not promo_code_obj.is_valid:
+                    raise ValidationError('Promo code is not valid')
+                if promo_code_obj.valid_until  < date.today():
+                    promo_code_obj.is_valid=False
+                    raise ValidationError('Promo code has expired')
+                
 
 class RegistrationForm(forms.ModelForm):
     login = forms.CharField(widget=forms.TextInput(attrs={'required': True}))
