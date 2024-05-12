@@ -6,10 +6,15 @@
     {% csrf_token %}
     <button type="submit">Home</button>
    <ul>
-     {% for client in clients %}
+     {% for city, clients in clients_by_city.items %}
        <li>
-         <p>{{ client }}</p>
+         <h3>{{ city }}</h3>
+         <ul>
+           {% for client in clients %}
+             <li>{{ client.name }}</li>
+           {% endfor %}
+         </ul>
        </li>
-       {% endfor %}
+     {% endfor %}
    </ul>
 {% endblock %}

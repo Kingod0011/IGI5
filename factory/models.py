@@ -147,11 +147,16 @@ class Order(models.Model):
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     pickup_point = models.ForeignKey(PickupPoint, on_delete=models.SET_NULL, null=True)
+    price = models.DecimalField(max_digits=14, decimal_places=2)
     quantity = models.IntegerField()
-    promo_code = models.ForeignKey(PromoCode, on_delete=models.SET_NULL, null=True)
+    promo_code = models.ForeignKey(PromoCode, on_delete=models.SET_NULL,blank=True, null=True)
 
     def __str__(self):
         return f"{self.product_name} {self.client_name} {self.order_date} {self.completion_date} {self.pickup_point}"
+
+        #order_date_utc = self.order_date.astimezone(timezone('UTC'))
+        #completion_date_user_tz = localtime(self.completion_date, timezone=self.client.timezone)
+        #return f"{self.product_name} {self.client_name} {order_date_utc} {completion_date_user_tz} {self.pickup_point}"
 
     def get_absolute_url(self):
         return reverse('order_detail', args=[str(self.id)])

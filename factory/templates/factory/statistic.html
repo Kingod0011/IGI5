@@ -1,0 +1,36 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+   <h2>Sales Report</h2>   
+   <p>Total sales: {{ total_sales }}</p>
+   <p>Average sales: {{ sales_avg }}</p>
+   <p>Modes of sales:</p>
+   <ul>
+     {% for mode in sales_modes %}
+       <li>{{ mode }}</li>
+     {% endfor %}
+   </ul>
+   <p>Median of sales: {{ sales_median }}</p>
+   <p>Average client age: {{ age_avg }}</p>
+   <p>Median client age: {{ age_median }}</p>
+   <p>Most popular product type: {{ popular_product_type.product_type }}, num of orders: {{ popular_product_type.total }}</p>
+   <p>Most popular profitable type: {{ most_profitable_product_type.product_type }}, profit: {{ most_profitable_product_type.total_profit }}</p>
+   <h3>Products by number of orders:</h3>
+   <ul>
+     {% for product in products_by_orders %}
+       <li>{{ product.name }}: {{ product.total_orders }}</li>
+     {% endfor %}
+   </ul>
+   <h3>Monthly sales:</h3>
+   <ul>
+     {% for sale in monthly_sales %}
+       <li>{{ sale.product__product_type }}: {{ sale.total }}</li>
+     {% endfor %}
+   </ul>
+   <h3>Yearly sales:</h3>
+   <ul>
+     {% for sale in yearly_sales %}
+       <li>{{ sale }}: {{ sale.price }}</li>
+     {% endfor %}
+   </ul>
+{% endblock %}

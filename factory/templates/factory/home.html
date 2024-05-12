@@ -6,12 +6,19 @@
         {% csrf_token %}
         <button type="submit">Logout</button>
     </form>
+    {% if not is_superuser %}
     <form action="{% url 'profile' %}" method="get">
         {% csrf_token %}
         <button type="submit">Profile</button>
     </form>
-    
-        {% if is_employee %}
+    {% endif %}
+    {% if is_superuser %}
+    <form action="{% url 'statistic' %}" method="get">
+        {% csrf_token %}
+        <button type="submit">Statistic</button>
+    </form>
+    {% endif %}
+        {% if is_employee or is_superuser %}
         <form action="{% url 'clients' %}" method="get">
             {% csrf_token %}
             <button type="submit">Clients</button>
@@ -44,6 +51,13 @@
                 <option value="{{ producttype }}" {% if request.GET.producttype == producttype.name %}selected{% endif %}>{{ producttype }}</option>
             {% endfor %}
         </select>
+        <label for="productmodel">ProductModel:</label>
+        <select id="productmodel" name="productmodel">
+            <option value="">All</option>
+            {% for productmodel in productmodels %}
+                <option value="{{ productmodel }}" {% if request.GET.productmodel == productmodel.name %}selected{% endif %}>{{ productmodel }}</option>
+            {% endfor %}
+        </select>
         <label for="search">Search (by name):</label>
         <input type="text" id="search" name="search" value="{{ request.GET.search }}">
         <input type="submit" value="Filter">
@@ -52,9 +66,7 @@
     {% for product in products %}
         <div>
             <h2>{{ product }}</h2>
-            {% if is_employee %}
-                
-            {% else %}
+            {% if not is_employee and not is_superuser %}
             <form action="{% url 'create_order' product.id %}" method="get">
                 {% csrf_token %}
                 <input type="submit" value="Order">
