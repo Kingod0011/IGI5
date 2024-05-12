@@ -33,4 +33,6 @@
        <li>{{ sale }}: {{ sale.price }}</li>
      {% endfor %}
    </ul>
+   <a href="{% url 'add_random_client' %}"><li>Add random client</li></a>
+   <a href="{% url 'add_random_news' %}"><li>Add random news</li></a>
 {% endblock %}

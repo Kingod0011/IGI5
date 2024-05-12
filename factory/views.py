@@ -1,20 +1,87 @@
 from django.views import View
 from django.views.generic import ListView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegistrationForm,ClientForm, EmployeeForm, OrderForm
 from django.contrib.auth.models import User, Group
 from .models import Product, ProductType, Client, Employee, Order, PromoCode, Factory, ProductModel, Reviews
 from django.db.models import Q, Count, Sum
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, user_passes_test
 from functools import wraps
 from django.http import HttpResponse, HttpResponseBadRequest
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from itertools import groupby
 from django.utils.timezone import now
 from collections import Counter
+import requests
 from statistics import mean, mode, median, StatisticsError
+import random
+import logging
+
+logger = logging.getLogger(__name__)
+
+def superuser_required(function=None):
+    actual_decorator = user_passes_test(
+        lambda u: u.is_superuser,
+        login_url='/login/',
+        redirect_field_name=None
+    )
+    if function:
+        return actual_decorator(function)
+    return actual_decorator
+
+class ClientsOnlyView(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name='Clients').exists()
+
+class EmployeesOrSuperuserView(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name='Employees').exists() or self.request.user.is_superuser
+
+class EmployeesOrClientsView(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name='Employees').exists() or self.request.user.groups.filter(name='Clients').exists()
+
+class AnonymousRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return not self.request.user.is_authenticated
+
+class SuperuserOnlyView(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_superuser
+
+def in_clients_group(user):
+    return user.groups.filter(name='Clients').exists()
+
+def in_employees_group(user):
+    return user.groups.filter(name='Employees').exists()
+
+@login_required
+@superuser_required
+def add_random_client(request):
+    response = requests.get('https://randomuser.me/api/')
+    data = response.json()
+
+    user_data = data['results'][0]
+    username = user_data['login']['username']
+    password = 'password'
+    name = user_data['name']['first'] + " " + user_data['name']['last']
+    dob = datetime.strptime(user_data['dob']['date'], "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    part1 = random.randint(10, 99)
+    part2 = random.randint(100, 999)
+    part3 = random.randint(10, 99)
+    part4 = random.randint(10, 99)
+    phone = f"+375 ({part1}) {part2}-{part3}-{part4}"
+    address = f"{user_data['location']['street']['name']} {user_data['location']['street']['number']}"
+    city = user_data['location']['city']
+    company = "Silly Socks"
+    user = User.objects.create_user(username=username, password=password)
+    client = Client(user=user, name=name, date_of_birth=dob, address=address, phone=phone, city=city, company=company)
+    client.save()
+    logging.info("Add new client")
+    return redirect('/main/')
 
 def reviews_list(request):
     reviews = Reviews.objects.all()
@@ -39,7 +106,7 @@ def calculate_age(born):
     return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
 
-class StatisticView(View):
+class StatisticView(SuperuserOnlyView,View):
     def get(self, request):
         if not request.user.is_superuser:
             return redirect('login')
@@ -76,9 +143,9 @@ class StatisticView(View):
         }
         return render(request, 'statistic.html', context)
 
-
+@login_required
+@user_passes_test(in_clients_group)
 def order_create(request, product_id):
-    
     if request.user.is_authenticated:
         if request.user.groups.filter(name='Clients').exists():
             if request.method == 'POST':
@@ -104,16 +171,20 @@ def order_create(request, product_id):
                     order.price = order.quantity * order.product.price * (1 if not order.promo_code else (order.promo_code.discount/100.))
                     order.save()
                     factory.save()
+                    logging.info("Add new order")
                     return HttpResponse(f'Ваш заказ будет готов: {factory.busy_until}')
             else:
                 form = OrderForm()
+                logging.info("Submitting an order creation form")
             return render(request, 'order_create.html', {'form': form})
         else:
+            logging.warning("Attempt to create an order by someone other than the client")
             return redirect('login')
     else:
+        logging.warning("Unauthorized user")
         return redirect('login')
     
-class RegistrationView(View):
+class RegistrationView(AnonymousRequiredMixin, View):
     def handle_request(self, request):
         if request.method == 'POST':
             form = RegistrationForm(request.POST)
@@ -124,12 +195,13 @@ class RegistrationView(View):
                 user.groups.add(group)
                 client.user = user
                 client.save()
+                logging.info("Add new client")
                 return redirect('/')
             else:
                 print(form.errors)
         else:
+            logging.info("Submitting an order registration form")
             form = RegistrationForm()
-
         return render(request, 'register.html', {'form': form})
 
     get = handle_request
@@ -172,7 +244,7 @@ class HomePageView(View):
 
 
 
-class ProfileView(View):
+class ProfileView(EmployeesOrClientsView, View):
     def get(self, request):
         if request.user.is_authenticated:
             if request.user.groups.filter(name='Clients').exists():
@@ -187,7 +259,7 @@ class ProfileView(View):
         else:
             return redirect('login')
 
-class EditProfileView(View):
+class EditProfileView(EmployeesOrClientsView, View):
     def handle_request(self, request):
         if request.user.is_authenticated:
             if request.user.groups.filter(name='Clients').exists():
@@ -205,6 +277,7 @@ class EditProfileView(View):
                 form = FormClass(request.POST, request.FILES, instance=instance)
                 if form.is_valid():
                     form.save()
+                    logging.info("Edit info")
                     return redirect('profile')
             else:
                 form = FormClass(instance=instance)
@@ -217,7 +290,7 @@ class EditProfileView(View):
     post = handle_request
 
 
-class ClientListView(ListView):
+class ClientListView(EmployeesOrSuperuserView, ListView):
     model = Client
     template_name = 'clients.html'  
     context_object_name = 'clients'
@@ -229,7 +302,7 @@ class ClientListView(ListView):
         return context
 
 
-class OrderListView(ListView):
+class OrderListView(EmployeesOrSuperuserView, ListView):
     model = Order
     template_name = 'orders.html'  # <app>/<model>_<viewtype>.html
     context_object_name = 'orders'
