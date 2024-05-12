@@ -1,32 +1,28 @@
-{% extends "base_generic.html" %}
-
-{% block content %}
-    <form action="" method="post">
-        {% csrf_token %}
-        <label for="login">Login:</label><br>
-        {{ form.login.errors }}
-        <input type="text" id="login" name="login" value="{{ form.login.value|default_if_none:'' }}" required><br>
-        <label for="password">Password:</label><br>
-        {{ form.password.errors }}
-        <input type="password" id="password" name="password" value="{{ form.password.value|default_if_none:'' }}" required><br>
-        <label for="name">Name:</label><br>
-        {{ form.name.errors }}
-        <input type="text" id="name" name="name" value="{{ form.name.value|default_if_none:'' }}" required><br>
-        <label for="phone ">Phone (+375 (29) XXX-XX-XX):</label><br>
-        {{ form.phone.errors }}
-        <input type="tel" id="phone" name="phone" pattern="\+375 \(\d{2}\) \d{3}-\d{2}-\d{2}" value="{{ form.phone.value|default_if_none:'' }}" required><br>
-        <label for="city">City:</label><br>
-        {{ form.city.errors }}
-        <input type="text" id="city" name="city" value="{{ form.city.value|default_if_none:'' }}" required><br>
-        <label for="address">Address:</label><br>
-        {{ form.address.errors }}
-        <input type="text" id="address" name="address" value="{{ form.address.value|default_if_none:'' }}" required><br>
-        <label for="company">Company:</label><br>
-        {{ form.company.errors }}
-        <input type="text" id="company" name="company" value="{{ form.company.value|default_if_none:'' }}"><br>
-        <label for="date_of_birth">Date of Birth:</label><br>
-        {{ form.date_of_birth.errors }}
-        <input type="date" id="date_of_birth" name="date_of_birth" value="{{ form.date_of_birth.value|default_if_none:'' }}" required><br>
-        <input type="submit" value="Submit">
-    </form>
-{% endblock %}
+<form action="" method="post">
+    {% csrf_token %}
+    <label for="login">Login:</label><br>
+    {{ form.login.errors }}
+    <input type="text" id="login" name="login" value="{{ form.login.value|default_if_none:'' }}" required><br>
+    <label for="password">Password:</label><br>
+    {{ form.password.errors }}
+    <input type="password" id="password" name="password" value="{{ form.password.value|default_if_none:'' }}" required><br>
+    <label for="name">Name:</label><br>
+    {{ form.name.errors }}
+    <input type="text" id="name" name="name" value="{{ form.name.value|default_if_none:'' }}" required><br>
+    <label for="phone ">Phone (+375 (29) XXX-XX-XX):</label><br>
+    {{ form.phone.errors }}
+    <input type="tel" id="phone" name="phone" pattern="\+375 \(\d{2}\) \d{3}-\d{2}-\d{2}" value="{{ form.phone.value|default_if_none:'' }}" required><br>
+    <label for="city">City:</label><br>
+    {{ form.city.errors }}
+    <input type="text" id="city" name="city" value="{{ form.city.value|default_if_none:'' }}" required><br>
+    <label for="address">Address:</label><br>
+    {{ form.address.errors }}
+    <input type="text" id="address" name="address" value="{{ form.address.value|default_if_none:'' }}" required><br>
+    <label for="company">Company:</label><br>
+    {{ form.company.errors }}
+    <input type="text" id="company" name="company" value="{{ form.company.value|default_if_none:'' }}"><br>
+    <label for="date_of_birth">Date of Birth:</label><br>
+    {{ form.date_of_birth.errors }}
+    <input type="date" id="date_of_birth" name="date_of_birth" value="{{ form.date_of_birth.value|default_if_none:'' }}" required><br>
+    <input type="submit" value="Submit">
+</form>

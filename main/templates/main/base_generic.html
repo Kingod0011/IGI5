@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <aside>
+        <ul>
+            <h2>Stool of Smiles</h2>  
+            <a href="{% url 'main' %}"><li>Home</li></a>
+            <a href="{% url 'news' %}"><li>News</li></a>
+            <a href="{% url 'faq' %}"><li>FAQ</li></a>
+            <a href="{% url 'about' %}"><li>About us</li></a>
+            <a href="{% url 'home' %}"><li>Products</li></a>
+            <a href="{% url 'contacts' %}"><li>Contacts</li></a>
+            <a href="{% url 'vacancies' %}"><li>Vacancies</li></a>
+            <a href="{% url 'promocodes' %}"><li>Promocodes</li></a>
+            <a href="{% url 'reviews' %}"><li>Reviews</li></a>
+            {% if user.is_authenticated %}
+                {% if not user.is_superuser %}
+                    <a href="{% url 'profile' %}"><li>Profile</li></a>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'statistic' %}"><li>Statistic</li></a>
+                    <a href="{% url 'admin:index' %}"><li>Admin panel</li></a>
+                {% endif %}
+            {% endif %}
+        </ul>
+        
+    </aside>
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
+        {% else %}
+        <form action="{% url 'register' %}" method="get">
+            {% csrf_token %}
+            <button type="submit">Register </button>
+        </form>
+        <form action="{% url 'login' %}" method="get">
+            {% csrf_token %}
+            <button type="submit">Login</button>
+        </form>
+        {% endif %}
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

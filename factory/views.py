@@ -3,7 +3,7 @@ from django.views.generic import ListView, CreateView
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegistrationForm,ClientForm, EmployeeForm, OrderForm
 from django.contrib.auth.models import User, Group
-from .models import Product, ProductType, Client, Employee, Order, PromoCode, Factory, ProductModel
+from .models import Product, ProductType, Client, Employee, Order, PromoCode, Factory, ProductModel, Reviews
 from django.db.models import Q, Count, Sum
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
@@ -15,6 +15,18 @@ from itertools import groupby
 from django.utils.timezone import now
 from collections import Counter
 from statistics import mean, mode, median, StatisticsError
+
+def reviews_list(request):
+    reviews = Reviews.objects.all()
+    return render(request, 'reviews.html', {'reviews': reviews})
+
+def promocode_list(request):
+    promocodes = PromoCode.objects.filter()
+    return render(request, 'promocodes.html', {'promocodes': promocodes})
+
+def employee_list(request):
+    employees = Employee.objects.all()
+    return render(request, 'employees.html', {'employees': employees})
 
 def all_modes(data):
     counts = Counter(data)

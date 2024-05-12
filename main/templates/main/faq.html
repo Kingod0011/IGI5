@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+
+{% block title %}FAQ - Galatea{% endblock %}
+
+{% block content %}
+     <section>
+         <h1>Frequently asked questions</h1>
+         <ul>
+             {% for faq_item in faq_items %}
+             <li>
+                 <h3>{{ faq_item.question }}</h3>
+                 <p>{{ faq_item.answer }}</p>
+                 <p>Date added: {{ faq_item.date_added }}</p>
+             </li>
+             {% endfor %}
+         </ul>
+     </section>
+{% endblock %}

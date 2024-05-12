@@ -1,0 +1,21 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+   <h2>List of employees</h2>
+   {% for employee in employees %}
+     <div>
+       <h3>{{ employee.name }}</h3>
+       {% if employee.photo %}
+         <img src="{{ employee.photo.url }}" alt="{{ employee.name }} " width="300" height="400">
+       {% else %}
+         <img src="{{ MEDIA_URL }}default_employee.jfif" alt="Default Image">
+       {% endif %}
+       {% if employee.description %}
+         <p>{{ employee.description }}</p>
+       {% endif %}
+       <p>Phone: {{ employee.phone }}</p>
+       <p>Email: {{ employee.email }}</p>
+       <p>Date of birth: {{ employee.date_of_birth }}</p>
+     </div>
+   {% endfor %}
+{% endblock %}

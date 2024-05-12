@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h2>List of Promo Codes</h2>
+  <ul>
+  {% for promocode in promocodes %}
+    <li>
+      {{ promocode }}
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

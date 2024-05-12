@@ -1,0 +1,13 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h2>List of Reviews</h2>
+  {% for review in reviews %}
+    <div>
+      <h3>Review from: {{ review.client_name }}</h3>
+      <p>Text: {{ review.text }}</p>
+      <p>Rating: {{ review.rating }}</p>
+      <p>Created at: {{ review.created_at }}</p>
+    </div>
+  {% endfor %}
+{% endblock %}

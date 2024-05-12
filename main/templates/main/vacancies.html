@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+   <h2>List of vacancies</h2>
+   {% for vacancy in vacancies %}
+     <div>
+       <h3>{{ vacancy.title }}</h3>
+       <p>{{ vacancy.description }}</p>
+       <p>Creation date: {{ vacancy.creation_date }}</p>
+     </div>
+   {% endfor %}
+{% endblock %}

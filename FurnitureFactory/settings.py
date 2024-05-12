@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'factory',
+    'main',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
-        'DIRS': [os.path.join(BASE_DIR, 'templates/registration'), os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'factory/templates/factory')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates/registration'), os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'main/templates/main'), os.path.join(BASE_DIR, 'factory/templates/factory')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,6 +118,8 @@ USE_I18N = True
 USE_TZ = True
 
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 

@@ -1,43 +1,11 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-    <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-    {% if not is_superuser %}
-    <form action="{% url 'profile' %}" method="get">
-        {% csrf_token %}
-        <button type="submit">Profile</button>
-    </form>
-    {% endif %}
-    {% if is_superuser %}
-    <form action="{% url 'statistic' %}" method="get">
-        {% csrf_token %}
-        <button type="submit">Statistic</button>
-    </form>
-    {% endif %}
-        {% if is_employee or is_superuser %}
-        <form action="{% url 'clients' %}" method="get">
-            {% csrf_token %}
-            <button type="submit">Clients</button>
-        </form>
-        <form action="{% url 'orders' %}" method="get">
-            {% csrf_token %}
-            <button type="submit">Orders</button>
-        </form>
-        {% endif %}
-    {% else %}
-    <form action="{% url 'register' %}" method="get">
-        {% csrf_token %}
-        <button type="submit">Register</button>
-    </form>
-    <form action="{% url 'login' %}" method="get">
-        {% csrf_token %}
-        <button type="submit">Login</button>
-    </form>
-    {% endif %}
+    
+    {% if is_employee or user.is_superuser %}
+        <a href="{% url 'clients' %}"><li>Clients</li></a>
+        <a href="{% url 'orders' %}"><li>Orders</li></a>
+    {% endif %}   
 
     <form action="" method="get">
         <label for="price_min">Price from:</label>
