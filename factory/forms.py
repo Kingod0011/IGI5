@@ -1,8 +1,20 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Client, Employee, Order, PromoCode
+from .models import Client, Employee, Order, PromoCode, Reviews
 from django.contrib.auth.models import User
 from datetime import date, timedelta
+
+from django.forms import Select, Textarea
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Reviews
+        fields = ['rating', 'text']
+
+        widgets = {
+            "rating": Select(choices=[(i, i) for i in range(1, 6)], attrs={'placeholder': 'Выберите оценку от 1 до 5', 'title': 'Выберите оценку от 1 до 5'}),
+            "text": Textarea(attrs={'placeholder': 'Напишите здесь свой отзыв'})
+        }
 
 class OrderForm(forms.ModelForm):    
     promo = forms.CharField(required=False,widget=forms.TextInput(attrs={'required': False}))  

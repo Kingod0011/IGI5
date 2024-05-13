@@ -20,4 +20,5 @@ urlpatterns = [
     re_path(r'^reviews/$', reviews_list, name='reviews'),
     re_path(r'^$', RedirectView.as_view(url='/home/')),
     path('add_random_client/', add_random_client, name='add_random_client'),
+    path('add_review', views.add_review_view, name='add_review'),
 ]

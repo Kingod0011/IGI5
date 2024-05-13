@@ -2,7 +2,7 @@ from django.views import View
 from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import RegistrationForm,ClientForm, EmployeeForm, OrderForm
+from .forms import RegistrationForm,ClientForm, EmployeeForm, OrderForm, ReviewForm
 from django.contrib.auth.models import User, Group
 from .models import Product, ProductType, Client, Employee, Order, PromoCode, Factory, ProductModel, Reviews
 from django.db.models import Q, Count, Sum
@@ -37,6 +37,8 @@ def superuser_required(function=None):
         return actual_decorator(function)
     return actual_decorator
 
+
+
 class ClientsOnlyView(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         return self.request.user.groups.filter(name='Clients').exists()
@@ -56,6 +58,29 @@ class AnonymousRequiredMixin(UserPassesTestMixin):
 class SuperuserOnlyView(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser
+
+def add_review_view(request):
+    error = ''
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user.client
+            review.client_name = request.user.client.name 
+            review.save()
+            return redirect('reviews')
+        else:
+            error = 'Форма была неверной'
+
+    form = ReviewForm()
+
+    data = {
+        'form': form,
+        'error': error
+    }
+
+    return render(request, 'add_review.html', data)
+
 
 def in_clients_group(user):
     return user.groups.filter(name='Clients').exists()

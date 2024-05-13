@@ -9,6 +9,10 @@ from .models import Articles, CompanyInfo, FAQ, Vacancy
 from django.contrib.auth.decorators import login_required, user_passes_test
 import requests
 import logging
+import pytz
+from django.utils import timezone
+from datetime import datetime, timezone
+
 
 def superuser_required(function=None):
     actual_decorator = user_passes_test(
@@ -25,9 +29,20 @@ def vacancy_list(request):
     return render(request, 'vacancies.html', {'vacancies': vacancies})
 
 def index(request):
-    latest_article = Articles.objects.last()
-    return render(request, 'main/index.html', {'latest_article': latest_article})
+    latest_article = Articles.objects.last() 
 
+    date_utc = datetime.now(timezone.utc)
+    current_date = date_utc.astimezone()
+    user_timezone = str(current_date.tzinfo)
+    utc_offset = current_date.utcoffset().total_seconds() / 3600
+    
+    return render(request, 'main/index.html', {
+        'latest_article': latest_article,
+        'current_date': current_date,
+        'user_timezone': user_timezone,
+        'utc_offset': utc_offset,
+        
+    })
 def about(request):
     company_info = CompanyInfo.objects.last()
     return render(request, 'main/about.html', {'company_info': company_info})

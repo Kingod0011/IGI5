@@ -7,6 +7,11 @@
          <h3>Current article</h3>
          <h2>{{ latest_article.title }}</h2>
          <p>{{ latest_article.summary }}</p>
-         <img src="{{ latest_article.image.url }}" alt="{{ latest_article.title }}" width="400" height="200">
+         <img src="{{ latest_article.image.url }}" alt="{{ latest_article.title }}"width="400" height="200">
      </article>
+     <div>
+         <p>Current date: {{ current_date|date:"d/m/Y" }}</p>
+         <p>User time zone: {{ user_timezone }}</p>
+         <p>Uts offset {{ utc_offset }}</p>
+     </div>
 {% endblock %}
