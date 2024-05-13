@@ -17,8 +17,13 @@ from django.utils.timezone import now
 from collections import Counter
 import requests
 from statistics import mean, mode, median, StatisticsError
+import matplotlib.pyplot as plt
+import matplotlib
 import random
 import logging
+import time
+from django.contrib.staticfiles.storage import staticfiles_storage
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +68,6 @@ def in_employees_group(user):
 def add_random_client(request):
     response = requests.get('https://randomuser.me/api/')
     data = response.json()
-
     user_data = data['results'][0]
     username = user_data['login']['username']
     password = 'password'
@@ -78,6 +82,8 @@ def add_random_client(request):
     city = user_data['location']['city']
     company = "Silly Socks"
     user = User.objects.create_user(username=username, password=password)
+    group = Group.objects.get(name='Clients')  
+    user.groups.add(group)
     client = Client(user=user, name=name, date_of_birth=dob, address=address, phone=phone, city=city, company=company)
     client.save()
     logging.info("Add new client")
@@ -128,6 +134,17 @@ class StatisticView(SuperuserOnlyView,View):
         monthly_sales = Order.objects.filter(order_date__gte=now()-timedelta(days=30)).values('product__product_type').annotate(total=Sum('quantity'))
         yearly_sales = Order.objects.filter(order_date__gte=now()-timedelta(days=365))
 
+        data=Product.objects.values('product_type').annotate(total_profit=Sum('order__price')).order_by('-total_profit')
+
+        product_types = [item['product_type'] for item in data]
+        total_profits = [item['total_profit'] for item in data]
+        print(staticfiles_storage.url('my_plot2.png'))
+        #plt.bar(product_types, total_profits)
+        #plt.xlabel('Product')
+        #plt.ylabel('Total Orders')
+        #plt.title('Total Orders by Product')
+        #plt.savefig('static/my_plot2.png')
+
         context = {
             'total_sales': total_sales,
             'sales_avg': sales_avg,
@@ -139,7 +156,7 @@ class StatisticView(SuperuserOnlyView,View):
             'most_profitable_product_type': most_profitable_product_type,
             'products_by_orders': products_by_orders,
             'monthly_sales': monthly_sales,
-            'yearly_sales': yearly_sales,
+            'yearly_sales': yearly_sales
         }
         return render(request, 'statistic.html', context)
 
@@ -154,6 +171,8 @@ def order_create(request, product_id):
                     order = form.save(commit=False)
                     promo = form.cleaned_data['promo']
                     promo_code = PromoCode.objects.filter(code=promo).first()
+                    print(promo_code)
+                    print(promo)
                     order.promo_code = promo_code
                     if order.promo_code:
                         promo_code.times_used+=1
@@ -168,7 +187,8 @@ def order_create(request, product_id):
                     order.product_name = order.product.name
                     factory.busy_until += timedelta(seconds=int(order.quantity * order.product.production_time.total_seconds() ))
                     order.completion_date = factory.busy_until
-                    order.price = order.quantity * order.product.price * (1 if not order.promo_code else (order.promo_code.discount/100.))
+                    discount = 1 if not order.promo_code else (order.promo_code.discount/Decimal(100.))
+                    order.price = order.quantity * order.product.price * discount
                     order.save()
                     factory.save()
                     logging.info("Add new order")

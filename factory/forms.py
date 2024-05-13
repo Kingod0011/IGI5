@@ -22,6 +22,7 @@ class OrderForm(forms.ModelForm):
                 if promo_code_obj.valid_until  < date.today():
                     promo_code_obj.is_valid=False
                     raise ValidationError('Promo code has expired')
+        return promo
                 
 
 class RegistrationForm(forms.ModelForm):

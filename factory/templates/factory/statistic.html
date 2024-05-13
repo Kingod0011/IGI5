@@ -1,4 +1,5 @@
 {% extends "base_generic.html" %}
+{% load static %}
 
 {% block content %}
    <h2>Sales Report</h2>   
@@ -35,4 +36,5 @@
    </ul>
    <a href="{% url 'add_random_client' %}"><li>Add random client</li></a>
    <a href="{% url 'add_random_news' %}"><li>Add random news</li></a>
+   <img src="{% static 'my_plot.png' %}" alt="My Plot">
 {% endblock %}
